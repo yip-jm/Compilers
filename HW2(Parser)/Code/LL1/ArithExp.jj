@@ -1,0 +1,104 @@
+// Option块
+
+options {
+    STATIC = false;
+}
+
+// Class声明块
+PARSER_BEGIN(IsAriExp)
+    import java.io.PrintStream ;
+    class IsAriExp {
+        public static void main( String[] args )
+            throws ParseException, TokenMgrError, NumberFormatException {
+            IsAriExp parser = new IsAriExp( System.in ) ;
+            parser.Start( System.out ) ;
+        }
+    }
+PARSER_END(IsAriExp)
+
+SKIP: { " " }
+TOKEN: { < EOL : "\n" | "\r" | "\r\n" > }
+TOKEN: { < PLUS : "+" > }
+TOKEN: { < MINUS : "-" > }
+TOKEN: { < TIMES : "*" > }
+TOKEN: { < DIVIDE : "/" > }
+TOKEN: { < OPEN_PAR : "(" > }
+TOKEN: { < CLOSE_PAR : ")" > }
+TOKEN: { < ID : <DIGITS>
+                |<DIGITS>"."<DIGITS>
+                |<DIGITS>"."
+                |"."<DIGITS>
+                |<LETTER>(<LETTER>|<DIGITS>)* >}
+TOKEN: { < #DIGITS : (["0"-"9"])+ > }
+TOKEN: { < #LETTER : (["A"-"Z","a"-"z","_"])+ > }
+
+
+//PROCEDURE MAIN
+void Start(PrintStream printStream) throws NumberFormatException :
+{}
+{
+    (
+        E()
+        <EOL> { printStream.println( "TRUE" ) ; }
+    )*
+    <EOF>
+}
+
+
+// PROCEDURE E
+void E() throws NumberFormatException :
+{}
+{
+    T()
+    E1()
+}
+
+// PROCEDURE E'
+void E1() throws NumberFormatException :
+{}
+{
+    (   
+        <PLUS> (
+            T()
+            E1()
+        )
+        | <MINUS> (
+            T()
+            E1()
+        )
+    )?
+}
+
+//PROCEDURE T
+void T() throws NumberFormatException :
+{}
+{
+    F()
+    T1()
+}
+
+// PROCEDURE T1
+void T1() throws NumberFormatException :
+{}
+{   
+    (   
+        <TIMES> (
+            F()
+            T1() 
+        )
+        | <DIVIDE> (
+            F()
+            T1()
+        )
+    )?
+}
+
+// PROCEDURE F
+void F() throws NumberFormatException :
+{}
+{
+    <ID>
+    | <OPEN_PAR> E() <CLOSE_PAR>
+    | <MINUS> F()
+
+}
