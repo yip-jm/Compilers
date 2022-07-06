@@ -1,0 +1,195 @@
+// Option块
+
+options {
+    STATIC = false;
+}
+
+// Class声明块
+PARSER_BEGIN(IsAriExp)
+    import java.io.PrintStream ;
+    class IsAriExp {
+        public static void main( String[] args )
+            throws ParseException, TokenMgrError, NumberFormatException {
+            IsAriExp parser = new IsAriExp( System.in ) ;
+            parser.Start( System.out ) ;
+        }
+    }
+PARSER_END(IsAriExp)
+
+
+
+
+SKIP: { "\n" | "\r" | "\r\n" | " " }
+
+TOKEN: { < PROGRAM : "program" > }
+TOKEN: { < VAR : "var" > }
+TOKEN: { < INTEGER : "integer" > }
+TOKEN: { < REAL:  "real" > }
+TOKEN: { < CHAR : "char" > }
+TOKEN: { < BEGIN : "begin" > }
+TOKEN: { < END : "end" > }
+
+TOKEN: { < COMMA : "," > }
+TOKEN: { < COLON : ":" > }
+TOKEN: { < SEMI : ";" > }
+TOKEN: { < ASSIGN : ":=" > }
+
+TOKEN: { < ADD : "+" > }
+TOKEN: { < DEC : "-" > }
+TOKEN: { < MUL : "*" > }
+TOKEN: { < DIV : "/" > }
+TOKEN: { < LB : "(" > }
+TOKEN: { < RB : ")" > }
+TOKEN: { < PT : "." > }
+
+TOKEN: { < NUMBER : <DIGITS>
+                    |<DIGITS>"."<DIGITS>
+                    |<DIGITS>"."
+                    |"."<DIGITS> > }
+TOKEN: { < ID : <LETTER>(<LETTER>|<DIGITS>)* >}
+TOKEN: { < #DIGITS : (["0"-"9"])+ > }
+TOKEN: { < #LETTER : (["A"-"Z","a"-"z","_"])+ > }
+
+
+
+//PROCEDURE MAIN
+void Start(PrintStream printStream) throws NumberFormatException :
+{}
+{
+    (
+        S()
+        { printStream.println( "TRUE" ) ; }
+    )*
+    <EOF>
+}
+
+//PROCEDURE S
+void S() throws NumberFormatException :
+{}
+{
+    <PROGRAM> <ID> A()
+}
+
+//PROCEDURE A
+void A() throws NumberFormatException :
+{}
+{
+    B()
+    C()
+}
+
+//PROCEDURE B
+void B() throws NumberFormatException :
+{}
+{
+    <VAR> D() <COLON> E() <SEMI>
+}
+
+//PROCEDURE D
+void D() throws NumberFormatException :
+{}
+{
+    <ID> D1()
+}
+
+//PROCEDURE D1
+void D1() throws NumberFormatException :
+{}
+{
+    (<COMMA> D())?
+}
+
+//PROCEDURE E
+void E() throws NumberFormatException :
+{}
+{
+    <INTEGER> 
+    | <REAL> 
+    | <CHAR> 
+}
+
+//PROCEDURE C
+void C() throws NumberFormatException :
+{}
+{
+    <BEGIN> F() <END>
+}   
+
+//PROCEDURE F
+void F() throws NumberFormatException :
+{}
+{
+    G()
+    F1()
+}
+
+//PROCEDURE F1
+void F1() throws NumberFormatException :
+{}
+{
+    ( <SEMI> G() )?
+}
+
+//PROCEDURE G
+void G() throws NumberFormatException :
+{}
+{
+    <ID> <ASSIGN> H()
+}
+
+//PROCEDURE H
+void H() throws NumberFormatException :
+{}
+{
+    I()
+    H1()
+}
+
+// PROCEDURE H1
+void H1() throws NumberFormatException :
+{}
+{
+    (   
+        <ADD> (
+            I()
+            H1()
+        )
+        | <DEC> (
+            I()
+            H1()
+        )
+    )?
+}
+
+//PROCEDURE I
+void I() throws NumberFormatException :
+{}
+{
+    J()
+    I1()
+}
+
+// PROCEDURE I1
+void I1() throws NumberFormatException :
+{}
+{   
+    (   
+        <MUL> (
+            J()
+            I1() 
+        )
+        | <DIV> (
+            J()
+            I1()
+        )
+    )?
+}
+
+// PROCEDURE J
+void J() throws NumberFormatException :
+{}
+{
+    <ID>
+    | <NUMBER>
+    | <LB> H() <RB>
+}
